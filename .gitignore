@@ -32,3 +32,5 @@
 
 # Python
 *.pyc
+/.history/objdictgen
+/objdictgen/Gnosis_Utils-1.2.2
