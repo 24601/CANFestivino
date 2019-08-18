@@ -674,7 +674,8 @@ class NodeInfosDialog(wx.Dialog):
 
     def _init_sizers(self):
         self.flexGridSizer1 = wx.FlexGridSizer(cols=1, hgap=0, rows=2, vgap=10)
-        self.MainSizer = wx.FlexGridSizer(cols=1, hgap=0, rows=8, vgap=5)
+        # self.MainSizer = wx.FlexGridSizer(rows=8, cols=1, vgap=5,hgap=0)
+        self.MainSizer = wx.FlexGridSizer(cols=1, vgap=5,hgap=0)
         
         self._init_coll_flexGridSizer1_Items(self.flexGridSizer1)
         self._init_coll_flexGridSizer1_Growables(self.flexGridSizer1)
@@ -1081,7 +1082,7 @@ class CreateNodeDialog(wx.Dialog):
 
     def OnProfileChoice(self, event):
         if self.Profile.GetStringSelection() == _("Other"):
-            dialog = wx.FileDialog(self, _("Choose a file"), self.Directory, "",  _("OD Profile files (*.prf)|*.prf|All files|*.*"), wx.OPEN|wx.CHANGE_DIR)
+            dialog = wx.FileDialog(self, _("Choose a file"), self.Directory, "",  _("OD Profile files (*.prf)|*.prf|All files|*.*"))
             dialog.ShowModal()
             filepath = dialog.GetPath()
             dialog.Destroy()
@@ -1240,7 +1241,7 @@ class AddSlaveDialog(wx.Dialog):
                                os.path.expanduser("~"),
                                "",
                                _("EDS files (*.eds)|*.eds|All files|*.*"),
-                               wx.OPEN)
+                               )
         if dialog.ShowModal() == wx.ID_OK:
             filepath = dialog.GetPath()
         else:
