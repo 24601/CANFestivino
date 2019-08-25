@@ -100,9 +100,9 @@ def ComputeValue(type, value):
         return "0x%X"%value, "\t/* %s */"%str(value)
 
 def WriteFile(filepath, content):
-    cfile = open(filepath,"w")
-    cfile.write(content)
-    cfile.close()
+    cppfile = open(filepath,"w")
+    cppfile.write(content)
+    cppfile.close()
 
 def GetTypeName(Node, typenumber):
     typename = Node.GetTypeName(typenumber)
