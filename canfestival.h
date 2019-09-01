@@ -32,6 +32,8 @@
 #include "CO_ErrorState.h"
 
 
+int blinkState = 0;
+
 // ---------  to be called by user app ---------
 
 template<const int redLEDPin, const int greenLEDPin> class CO {
@@ -42,6 +44,7 @@ public:
     ;
     void CO_Cycle();
     void CO_Init();
+    static void testBlink();
 
 private:
     static void errorStateBlink(uint8_t dummy);
@@ -50,59 +53,72 @@ private:
 };
 
 template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::CO_Init() {
-    if(redLEDPin>0) pinModeFast(redLEDPin, OUTPUT);
-    if(greenLEDPin>0) pinModeFast(greenLEDPin, OUTPUT);
-    if(redLEDPin>0) digitalWriteFast(redLEDPin, 1);
-    if(greenLEDPin>0) digitalWriteFast(greenLEDPin, 1);
-
+#ifdef EV_LED    
+    if (redLEDPin>0) { pinModeFast(redLEDPin, OUTPUT) };
+    if (greenLEDPin>0) { pinModeFast(greenLEDPin, OUTPUT) };
+    if (redLEDPin>0) { digitalWriteFast(redLEDPin, 1) };
+    if (greenLEDPin>0) { digitalWriteFast(greenLEDPin, 1) };
+#endif
     initCAN();
 
-    setState(Initialisation);
+    UNS8 st = setState(Initialisation);
+    Serial.println(st);
 
-    SetAlarm(0, &errorStateBlink, 62, 62);
+    // SetAlarm(0, &errorStateBlink, 62, 62);
+    byte stmp[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    CAN.sendMsgBuf(0, 0, 8, stmp);
 
-    if(redLEDPin>0) digitalWriteFast(redLEDPin, 0);
-    if(greenLEDPin>0) digitalWriteFast(greenLEDPin, 0);
+#ifdef EV_LED   
+    if (redLEDPin>0) { digitalWriteFast(redLEDPin, 0) };
+    if (greenLEDPin>0) { digitalWriteFast(greenLEDPin, 0) };
+#endif
+    st = setState(Operational);
+    Serial.println(st);
 }
 
 template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::CO_Cycle() {
+
     TimeDispatch();
 
-    if (CAN.checkReceive()) {
+    if ((CAN_MSGAVAIL == CAN.checkReceive()) && !CAN.checkError()) {
         CAN.readMsgBuf(&(m.len), m.data);
         m.cob_id = CAN.getCanId();
-        m.rtr = 0; // m_nRtr;
-
-        if (isRxNoError())
+        // m.rtr = 0; // m_nRtr;
+        m.rtr = CAN.isRemoteRequest();
+        // Serial.println(m.cob_id, HEX);
+        // Serial.println(m.rtr);
+        // Serial.println(CAN.isExtendedFrame());
+        if (isRxNoError()) {
             flashGreen();
+        }
         canDispatch(&m);         // process it
     }
 
-    uint8_t ef = CAN.errorFlag();
-    if (ef & MCP_CAN::EFlg_TxWar)
-        setTxErrorState(tx_warning);
+    // uint8_t ef = CAN.errorFlag();
+    // if (ef & MCP_CAN::EFlg_TxWar)
+    //     setTxErrorState(tx_warning);
 
-    if (ef & MCP_CAN::EFlg_TxBusOff) {
-        setTxErrorState(tx_bus_off);
-    } else if (ef & MCP_CAN::EFlg_TxEP)
-        setTxErrorState(tx_passive);
-    else if (!isTxNoError()) {
-        if (CAN.checkTransmit())
-            resetTxErrorState();
-    }
-    updateTxErrorState();
+    // if (ef & MCP_CAN::EFlg_TxBusOff) {
+    //     setTxErrorState(tx_bus_off);
+    // } else if (ef & MCP_CAN::EFlg_TxEP)
+    //     setTxErrorState(tx_passive);
+    // else if (!isTxNoError()) {
+    //     if (CAN.checkTransmit())
+    //         resetTxErrorState();
+    // }
+    // updateTxErrorState();
 
-    if (ef && MCP_CAN::EFlg_RxWar)
-        setRxErrorState(rx_warning);
+    // if (ef && MCP_CAN::EFlg_RxWar)
+    //     setRxErrorState(rx_warning);
 
-    if (ef & (MCP_CAN::EFlg_Rx1Ovr | MCP_CAN::EFlg_Rx0Ovr))
-        setRxErrorState(rx_overflow);
-    else if (ef && MCP_CAN::EFlg_RxEP)
-        setRxErrorState(rx_passive);
-    else if (greePatternStarted())
-        resetRxErrorState();
+    // if (ef & (MCP_CAN::EFlg_Rx1Ovr | MCP_CAN::EFlg_Rx0Ovr))
+    //     setRxErrorState(rx_overflow);
+    // else if (ef && MCP_CAN::EFlg_RxEP)
+    //     setRxErrorState(rx_passive);
+    // else if (greePatternStarted())
+    //     resetRxErrorState();
 
-    updateRxErrorState();
+    // updateRxErrorState();
 }
 
 template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::errorStateBlink(uint8_t dummy) {
@@ -117,6 +133,12 @@ template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::errorS
     } else {
         if(greenLEDPin>0) digitalWriteFast(greenLEDPin, 0);
     }
+}
+
+template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::testBlink() {
+    if(redLEDPin>0) digitalWriteFast(redLEDPin, !blinkState);
+    if(greenLEDPin>0) digitalWriteFast(greenLEDPin, blinkState);
+    blinkState = !blinkState;
 }
 
 #endif

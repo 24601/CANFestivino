@@ -64,10 +64,12 @@
 // #define DEBUG_WAR_CONSOLE_ON
 #ifdef DEBUG_WAR_CONSOLE_ON
 #define MSG_WAR(num, str, val)      \
-          printf(str);
+        //   printf(str);
 #else
-#    define MSG_WAR(num, str, val)
+#define MSG_WAR(num, str, val) 
+// Serial.print(num); Serial.print(str); Serial.println(val);
 #endif
 
 #endif
 
+// { Serial.print(num); Serial.print(str); Serial.println(val); }

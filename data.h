@@ -42,6 +42,7 @@ typedef struct struct_CO_Data CO_Data;
 #include "sync.h"
 #include "nmtSlave.h"
 #include "emcy.h"
+#include "sysdep.h"
 #ifdef CO_ENABLE_LSS
 #include "lss.h"
 #endif
@@ -248,20 +249,6 @@ struct struct_CO_Data {
 
 #ifdef CO_ENABLE_LSS
 
-#ifdef CO_ENABLE_LSS_FS	
-#define lss_fs_Initializer \
-		,0,						/* IDNumber */\
-  		128, 					/* BitChecked */\
-  		0,						/* LSSSub */\
-  		0, 						/* LSSNext */\
-  		0, 						/* LSSPos */\
-  		LSS_FS_RESET,			/* FastScan_SM */\
-  		-1,						/* timerFS */\
-  		{{0,0,0,0},{0,0,0,0}}   /* lss_fs_transfer */
-#else
-#define lss_fs_Initializer
-#endif		
-
 #define lss_Initializer {\
 		LSS_RESET,  			/* state */\
 		0,						/* command */\
@@ -274,12 +261,12 @@ struct struct_CO_Data {
 		"none",         		/* BaudRate */\
 		0,          			/* SwitchDelay */\
 		SDELAY_OFF,   			/* SwitchDelayState */\
-		NULL,					/* canHandle_t */\
+		/*NULL, */					/* canHandle_t */\
 		-1,						/* TimerMSG */\
 		-1,          			/* TimerSDELAY */\
 		NULL,        			/* Callback */\
-		0						/* LSSanswer */\
-		lss_fs_Initializer		/*FastScan service initialization */\
+		0,						/* LSSanswer */\
+		/* lss_fs_Initializer	*/	/*FastScan service initialization */\
 	  },\
 	  NULL 	/* _lss_StoreConfiguration*/
 #else

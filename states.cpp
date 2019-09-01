@@ -60,6 +60,7 @@ e_nodeState getState() {
  **/
 void canDispatch(Message *m) {
     UNS16 cob_id = UNS16_LE(m->cob_id);
+    // Serial.println(cob_id >> 7, HEX);
     switch (cob_id >> 7) {
         case SYNC: /* can be a SYNC or a EMCY message */
             if (cob_id == 0x080) /* SYNC */
@@ -84,8 +85,9 @@ void canDispatch(Message *m) {
             break;
         case SDOtx:
         case SDOrx:
-            if (ObjDict_Data.CurrentCommunicationState.csSDO)
+            if (ObjDict_Data.CurrentCommunicationState.csSDO) {
                 proceedSDO(m);
+            }
             break;
         case NODE_GUARD:
             if (ObjDict_Data.CurrentCommunicationState.csLifeGuard)
@@ -99,14 +101,14 @@ void canDispatch(Message *m) {
 #ifdef CO_ENABLE_LSS
             case LSS:
             if (!ObjDict_Data.CurrentCommunicationState.csLSS)break;
-            if ((*(ObjDict_iam_a_slave)) && cob_id==MLSS_ADRESS)
-            {
+            // if ((* (ObjDict_iam_a_slave)) && cob_id==MLSS_ADRESS)
+            // {
                 proceedLSS_Slave(m);
-            }
-            else if(!(*(ObjDict_iam_a_slave)) && cob_id==SLSS_ADRESS)
-            {
-                proceedLSS_Master(m);
-            }
+            // }
+            // else if(!(*(ObjDict_iam_a_slave)) && cob_id==SLSS_ADRESS)
+            // {
+            //     proceedLSS_Master(m);
+            // }
             break;
 #endif
     }
@@ -218,6 +220,8 @@ UNS8 setState(e_nodeState newState) {
  ** @return
  **/
 UNS8 getNodeId() {
+    // Serial.print("getNodeId: ");
+    // Serial.println(ObjDict_bDeviceNodeId);
     return ObjDict_bDeviceNodeId;
 }
 
@@ -236,7 +240,7 @@ void setNodeId(UNS8 nodeId) {
 #ifdef CO_ENABLE_LSS
     ObjDict_Data.lss_transfer.nodeID=nodeId;
     if(nodeId==0xFF) {
-        *ObjDict_Data.bDeviceNodeId = nodeId;
+        ObjDict_bDeviceNodeId = nodeId;
         return;
     }
     else
@@ -245,15 +249,14 @@ void setNodeId(UNS8 nodeId) {
         MSG_WAR(0x2D01, "Invalid NodeID",nodeId);
         return;
     }
-
-    if (!(si= ObjDict_scanIndexOD(0x1200, &si_size, &callbacks))) {
+    if (si= ObjDict_scanIndexOD(0x1200, &si_size, &callbacks)) {
         /* Adjust COB-ID Client->Server (rx) only id already set to default value or id not valid (id==0xFF)*/
-        if ((*(UNS16*) si[1].pObject == 0x600 + *ObjDict_Data.bDeviceNodeId) || (*ObjDict_Data.bDeviceNodeId == 0xFF)) {
+        if ((*(UNS16*) si[1].pObject == 0x600 + ObjDict_bDeviceNodeId) || (ObjDict_bDeviceNodeId == 0xFF)) {
             /* cob_id_client = 0x600 + nodeId; */
             *(UNS16*) si[1].pObject = 0x600 + nodeId;
         }
         /* Adjust COB-ID Server -> Client (tx) only id already set to default value or id not valid (id==0xFF)*/
-        if ((*(UNS16*) si[2].pObject == 0x580 + *ObjDict_Data.bDeviceNodeId) || (*ObjDict_Data.bDeviceNodeId == 0xFF)) {
+        if ((*(UNS16*) si[2].pObject == 0x580 + ObjDict_bDeviceNodeId) || (ObjDict_bDeviceNodeId == 0xFF)) {
             /* cob_id_server = 0x580 + nodeId; */
             *(UNS16*) si[2].pObject = 0x580 + nodeId;
         }
@@ -272,8 +275,8 @@ void setNodeId(UNS8 nodeId) {
         UNS32 cobID[] = {0x200, 0x300, 0x400, 0x500};
         while ((si= ObjDict_scanIndexOD(0x1400+i, &si_size, &callbacks)) && (i < 4)) {
             if ((*(UNS16*) si[1].pObject
-                            == cobID[i] + *ObjDict_Data.bDeviceNodeId)
-                    || (*ObjDict_Data.bDeviceNodeId == 0xFF))
+                            == cobID[i] + ObjDict_bDeviceNodeId)
+                    || (ObjDict_bDeviceNodeId == 0xFF))
             *(UNS16*) si[1].pObject = cobID[i]
             + nodeId;
             i++;
@@ -286,8 +289,8 @@ void setNodeId(UNS8 nodeId) {
         i = 0;
         while ((si= ObjDict_scanIndexOD(0x1800+i, &si_size, &callbacks)) && (i < 4)) {
             if ((*(UNS16*) si[1].pObject
-                            == cobID[i] + *ObjDict_Data.bDeviceNodeId)
-                    || (*ObjDict_Data.bDeviceNodeId == 0xFF))
+                            == cobID[i] + ObjDict_bDeviceNodeId)
+                    || (ObjDict_bDeviceNodeId == 0xFF))
             *(UNS16*) si[1].pObject = cobID[i]
             + nodeId;
             i++;
@@ -295,12 +298,12 @@ void setNodeId(UNS8 nodeId) {
     }
 
     /* Update EMCY COB-ID if already set to default*/
-    if ((error_cobid == *ObjDict_Data.bDeviceNodeId + 0x80)
-            || (*ObjDict_Data.bDeviceNodeId == 0xFF))
+    if ((error_cobid == ObjDict_bDeviceNodeId + 0x80)
+            || (ObjDict_bDeviceNodeId == 0xFF))
     error_cobid = nodeId + 0x80;
 
     /* bDeviceNodeId is defined in the object dictionary. */
-    *ObjDict_Data.bDeviceNodeId = nodeId;
+    ObjDict_bDeviceNodeId = nodeId;
 }
 #endif
 

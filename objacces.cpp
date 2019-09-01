@@ -87,7 +87,7 @@ UNS8 objectSize(const subindex *s) {
 //We need the function implementation for linking
 //Only a placeholder with a define isnt enough!
 UNS8 accessDictionaryError(UNS16 index, UNS8 subIndex,
-UNS32 sizeDataDict, UNS32 sizeDataGiven, UNS32 code) {
+    UNS32 sizeDataDict, UNS32 sizeDataGiven, UNS32 code) {
 #ifdef DEBUG_WAR_CONSOLE_ON
     MSG_WAR(0x2B09, "Dictionary index : ", index);
     MSG_WAR(0X2B10, "           subindex : ", subIndex);
@@ -198,7 +198,6 @@ UNS32 getODentry(UNS16 wIndex, UNS8 bSubindex, void * pDestData, UNS32 * pExpect
         if (*pExpectedSize < szData)
             *(ptr) = 0;
     }
-
     return OD_SUCCESSFUL;
 }
 
@@ -269,15 +268,18 @@ UNS32 setODentry(UNS16 wIndex, UNS8 bSubindex, void * pSourceData, UNS32 * pExpe
 }
 
 UNS32 RegisterSetODentryCallBack(UNS16 wIndex, UNS8 bSubindex, ODCallback_t Callback) {
+    // Serial.println("RegisterSetODentryCallBack");
     UNS8 size;
     ODCallback_t *CallbackList;
     const subindex *si;
 
     si = ObjDict_scanIndexOD(wIndex, &size, &CallbackList);
     if (si && CallbackList && bSubindex < size) {
+        // Serial.println("RegisterSetODentryCallBack got index");
         CallbackList[bSubindex] = Callback;
         return OD_SUCCESSFUL;
     } else
+        // Serial.println("RegisterSetODentryCallBack no index");
         return OD_NO_SUCH_OBJECT;
 }
 

@@ -29,6 +29,7 @@
 
 #include "applicfg.h"
 #include "CO_can.h"
+#include "sysdep.h"
 
 /* The nodes states 
  * -----------------

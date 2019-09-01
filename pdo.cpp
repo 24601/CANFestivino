@@ -66,7 +66,7 @@ UNS8 buildPDO(UNS8 numPdo, Message * pdo) {
     do {
         UNS8 dataType; /* Unused */
         UNS8 tmp[] = { 0, 0, 0, 0, 0, 0, 0, 0 }; /* temporary space to hold bits */
-
+        
         /* pointer fo the var which holds the mapping parameter of an mapping entry  */
         UNS32 *pMappingParameter = (UNS32 *) TPDO_map[prp_j + 1].pObject;
         UNS16 index = (UNS16) ((*pMappingParameter) >> 16);
@@ -85,6 +85,12 @@ UNS8 buildPDO(UNS8 numPdo, Message * pdo) {
                 MSG_ERR(0x1013, " Couldn't find mapped variable at index-subindex-size : ", (UNS32) (*pMappingParameter));
                 return 0xFF;
             }
+            // for (int i =0; i<8;i++) {
+            //     Serial.print(tmp[i]);
+            //     Serial.print(" ");
+            // }
+            // Serial.println("");
+            // Serial.println(Size);
             /* copy bit per bit in little endian */
             CopyBits((UNS8) Size, ((UNS8 *) tmp), 0, 0, (UNS8 *) &pdo->data[offset >> 3], (UNS8) (offset % 8), 0);
 
@@ -181,7 +187,7 @@ UNS8 proceedPDO(Message * m) {
             pwCobId = *(UNS16 *) param_si[1].pObject;
             if (pwCobId == UNS16_LE(m->cob_id)) {
                 /* The cobId is recognized */
-                MSG_WAR(0x3936, "cobId found at index ", RPDOIndex);
+                // MSG_WAR(0x3936, "cobId found at index ", RPDOIndex);
             } else {
                 continue;
             }
@@ -381,14 +387,23 @@ UNS8 sendPDOevent() {
 }
 
 UNS8 sendOnePDOevent(UNS8 pdoNum) {
+    // Serial.println("sendOnePDOevent 1");
     const subindex *param_si;
     UNS8 si_size;
     ODCallback_t *callbacks;
     Message pdo;
 
-    if (!ObjDict_Data.CurrentCommunicationState.csPDO || (ObjDict_PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED)) {
+    if (!ObjDict_Data.CurrentCommunicationState.csPDO) {
+        // Serial.println("sendOnePDOevent 2");
         return 0;
     }
+
+    if (ObjDict_PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED) {
+        // Serial.println("sendOnePDOevent 3");
+        return 0;
+    }
+
+    // Serial.println("sendOnePDOevent 4");
 
     param_si = ObjDict_scanIndexOD(0x1800 + pdoNum, &si_size, &callbacks);
 
@@ -521,7 +536,7 @@ UNS8 _sendPDOevent(UNS8 isSyncEvent) {
                         && !(ObjDict_PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED))) {
             sendOnePDOevent(pdoNum);
         } else {
-            MSG_WAR(0x306C, "  PDO is not on EVENT or synchro or not at this SYNC. Trans type : ", *pTransmissionType);
+            MSG_WAR(0x306C, "  PDO is not on EVENT or synchro or not at this SYNC. Trans type : ", pTransmissionType);
         }
     } /* end for */
     return 0;

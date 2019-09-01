@@ -758,7 +758,12 @@ UNS8 proceedSDO(Message *m) {
         }
         /* Looking for the cobid received. */
         pCobId = (UNS16*) si[1].pObject;
-        if (*pCobId == UNS16_LE(m->cob_id)) {
+        Serial.print(F("SDO My CobId: "));
+        Serial.println(*pCobId, HEX);
+        Serial.print(F("Msg CobId: "));
+        Serial.println(UNS16_LE(m->cob_id), HEX);
+
+        if (*pCobId == UNS16_LE(m->cob_id) || UNS16_LE(m->cob_id) == 0x600) {
             whoami = SDO_SERVER;
             MSG_WAR(0x3A62, "proceedSDO. I am server. index : ", 0x1200 + j);
             /* Defining Server number = index minus 0x1200 where the cobid received is defined. */
@@ -766,6 +771,8 @@ UNS8 proceedSDO(Message *m) {
             break;
         }
         j++;
+        // Serial.print("j: ");
+        // Serial.println(j);
     } /* end while */
     if (whoami == SDO_UNKNOWN) {
         /* Am-I client ? */
@@ -824,6 +831,9 @@ UNS8 proceedSDO(Message *m) {
     /* Other cases : cs is specified */
     if (cs == 0xFF)
         cs = getSDOcs(m->data[0]);
+
+    // Serial.print(F("cs: "));    
+    // Serial.println(cs);    
 
     /* Testing the command specifier */
     /* Allowed : cs = 0, 1, 2, 3, 4, 5, 6 */
@@ -1114,7 +1124,7 @@ UNS8 proceedSDO(Message *m) {
                     data[5] = (UNS8) (nbBytes >> 8);
                     data[6] = (UNS8) (nbBytes >> 16);
                     data[7] = (UNS8) (nbBytes >> 24);
-                    MSG_WAR(0x3A95, "SDO. Sending normal upload initiate response defined at index 0x1200 + ", nodeId);
+                    // MSG_WAR(0x3A95, "SDO. Sending normal upload initiate response defined at index 0x1200 + ", nodeId);
                     sendSDO(whoami, CliServNbr, data);
                 } else {
                     /* Expedited upload. (cs = 2 ; e = 1) */
@@ -1202,6 +1212,7 @@ UNS8 proceedSDO(Message *m) {
                     failedSDO(CliServNbr, whoami, 0, 0, SDOABT_LOCAL_CTRL_ERROR);
                     return 0xFF;
                 }
+                
                 /* Reset the wathdog */
                 RestartSDO_TIMER(line)
                 MSG_WAR(0x3AA1, "Received SDO upload segment defined at index 0x1200 + ", CliServNbr);
@@ -1306,9 +1317,9 @@ UNS8 proceedSDO(Message *m) {
             if (whoami == SDO_SERVER) {
                 if (!err) {
                     resetSDOline(line);
-                    MSG_WAR(0x3AA8, "SD0. Received SDO abort. Line released. Code : ", abortCode);
-                } else
-                    MSG_WAR(0x3AA9, "SD0. Received SDO abort. No line found. Code : ", abortCode);
+                    // MSG_WAR(0x3AA8, "SD0. Received SDO abort. Line released. Code : ", abortCode);
+                } 
+                // else  MSG_WAR(0x3AA9, "SD0. Received SDO abort. No line found. Code : ", abortCode);
                 /* Tips : The end user has no way to know that the server node has received an abort SDO. */
                 /* Its is ok, I think.*/
             }
@@ -1361,6 +1372,7 @@ UNS8 proceedSDO(Message *m) {
                         failedSDO(CliServNbr, whoami, index, subIndex, errorCode);
                         return 0xFF;
                     }
+                    
                     /* Preparing the response.*/
                     getSDOlineRestBytes(line, &nbBytes); /* get Nb bytes to transfer */
                     ObjDict_Data.transfers[line].objsize = nbBytes;
@@ -1372,7 +1384,7 @@ UNS8 proceedSDO(Message *m) {
                     data[5] = (UNS8) (nbBytes >> 8);
                     data[6] = (UNS8) (nbBytes >> 16);
                     data[7] = (UNS8) (nbBytes >> 24);
-                    MSG_WAR(0x3A9A, "SDO. Sending normal block upload initiate response defined at index 0x1200 + ", nodeId);
+                    // MSG_WAR(0x3A9A, "SDO. Sending normal block upload initiate response defined at index 0x1200 + ", nodeId);
                     sendSDO(whoami, CliServNbr, data);
                 } else if (SubCommand == SDO_BCS_END_UPLOAD_REQUEST) {
                     MSG_WAR(0x3AA2, "Received SDO block END upload request defined at index 0x1200 + ", CliServNbr);

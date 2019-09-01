@@ -73,7 +73,8 @@ void proceedNMTstateChange(Message *m) {
                     break;
 
                 case NMT_Reset_Comunication: {
-//                    UNS8 currentNodeId = getNodeId();
+                    
+                   UNS8 currentNodeId = getNodeId();
 
 //             if(ObjDict_Data.NMT_Slave_Communications_Reset_Callback != NULL)
 //                ObjDict_Data.NMT_Slave_Communications_Reset_Callback();
@@ -86,8 +87,9 @@ void proceedNMTstateChange(Message *m) {
 #ifdef CO_ENABLE_CHANGE_NODE_ID
                     // clear old NodeId to make SetNodeId reinitializing
                     // SDO, EMCY and other COB Ids
-                    *ObjDict_Data.bDeviceNodeId = 0xFF;
-
+                    // ObjDict_bDeviceNodeId = 0xFF;
+                    Serial.print(F("Set Node: "));
+                    Serial.println(currentNodeId);
                     setNodeId(currentNodeId);
 #endif
                 }
@@ -112,7 +114,8 @@ UNS8 slaveSendBootUp() {
     Message m;
 
 #ifdef CO_ENABLE_LSS
-    if(*ObjDict_Data.bDeviceNodeId==0xFF)return 0;
+    // if(*ObjDict_Data.bDeviceNodeId==0xFF)return 0;
+    if(ObjDict_bDeviceNodeId==0xFF)return 0;
 #endif
 
     MSG_WAR(0x3407, "Send a Boot-Up msg ", 0);
