@@ -387,23 +387,23 @@ UNS8 sendPDOevent() {
 }
 
 UNS8 sendOnePDOevent(UNS8 pdoNum) {
-    // Serial.println("sendOnePDOevent 1");
+    Serial.println(F("sendOnePDOevent 1"));
     const subindex *param_si;
     UNS8 si_size;
     ODCallback_t *callbacks;
     Message pdo;
 
     if (!ObjDict_Data.CurrentCommunicationState.csPDO) {
-        // Serial.println("sendOnePDOevent 2");
+        // Serial.println(F("sendOnePDOevent 2"));
         return 0;
     }
 
     if (ObjDict_PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED) {
-        // Serial.println("sendOnePDOevent 3");
+        // Serial.println(F("sendOnePDOevent 3"));
         return 0;
     }
 
-    // Serial.println("sendOnePDOevent 4");
+    // Serial.println(F("sendOnePDOevent 4"));
 
     param_si = ObjDict_scanIndexOD(0x1800 + pdoNum, &si_size, &callbacks);
 

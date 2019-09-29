@@ -758,10 +758,10 @@ UNS8 proceedSDO(Message *m) {
         }
         /* Looking for the cobid received. */
         pCobId = (UNS16*) si[1].pObject;
-        Serial.print(F("SDO My CobId: "));
-        Serial.println(*pCobId, HEX);
-        Serial.print(F("Msg CobId: "));
-        Serial.println(UNS16_LE(m->cob_id), HEX);
+        // Serial.print(F("SDO My CobId: "));
+        // Serial.println(*pCobId, HEX);
+        // Serial.print(F("Msg CobId: "));
+        // Serial.println(UNS16_LE(m->cob_id), HEX);
 
         if (*pCobId == UNS16_LE(m->cob_id) || UNS16_LE(m->cob_id) == 0x600) {
             whoami = SDO_SERVER;

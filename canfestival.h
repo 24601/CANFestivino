@@ -63,10 +63,20 @@ template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::CO_Ini
 
     UNS8 st = setState(Initialisation);
     Serial.println(st);
-
+    
+    UNS8 dataType; /* Unused */
+    UNS32 ByteSize = 4;
+    UNS8 tmp[] = { 0, 0, 0, 0, 0, 0, 0, 0 }; /* temporary space to hold bits */
+    
+    if (getODentry (0x1018, 4, tmp, &ByteSize, &dataType, 0) != OD_SUCCESSFUL) {
+            MSG_ERR(0x1013, " Couldn't find mapped variable at index-subindex-size : ", (UNS32) (*pMappingParameter));
+    } else {
+        UNS8 stmp[8] = { 0x10, 0x18, 0x04, 0x00, tmp[0], tmp[1], tmp[2], tmp[3] };
+        
+        CAN.sendMsgBuf(0x180, 0, 8, stmp);
+    }
     // SetAlarm(0, &errorStateBlink, 62, 62);
-    byte stmp[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    CAN.sendMsgBuf(0, 0, 8, stmp);
+
 
 #ifdef EV_LED   
     if (redLEDPin>0) { digitalWriteFast(redLEDPin, 0) };

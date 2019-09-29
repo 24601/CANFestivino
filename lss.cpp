@@ -301,8 +301,8 @@ UNS8 proceedLSS_Slave(Message *m)
 			}
 			else
 			{
-				Serial.print(F("SET NodeId"));
-				Serial.println(m->data[1]);
+				// Serial.print(F("SET NodeId"));
+				// Serial.println(m->data[1]);
 				ObjDict_Data.lss_transfer.nodeID = m->data[1];
 			}
 		}

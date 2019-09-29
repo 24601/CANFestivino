@@ -39,7 +39,7 @@
 
 //#define WD_SLEEP
 // Needed defines by Atmel lib
-#define FOSC           8000 // BG 16000        // 8 MHz External cristal
+#define FOSC           8000 // BG 16000        // 16 MHz External cristal
 #ifndef F_CPU
 #define F_CPU          (1000UL*FOSC) // Need for AVR GCC
 #endif
@@ -70,7 +70,7 @@ repeat repeat repeat repeat
 #define CO_ENABLE_CHANGE_NODE_ID
 
 #define EV
-// #define EV_SENSOR
+#define EV_SENSOR
 // #define EV_LED
 
 #endif /* _CONFIG_H_ */
