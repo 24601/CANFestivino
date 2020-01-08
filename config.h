@@ -39,11 +39,11 @@
 
 //#define WD_SLEEP
 // Needed defines by Atmel lib
-#define FOSC           8000 // BG 16000        // 16 MHz External cristal
+#define FOSC           16000 // BG 8000        // 16 MHz External cristal
 #ifndef F_CPU
 #define F_CPU          (1000UL*FOSC) // Need for AVR GCC
 #endif
-#define CAN_BAUDRATE    250 //BG - 500
+#define CAN_BAUDRATE    250 //BG - 250 // Check this as may be relative to 8MHz //Need to change on CAN Object as well
 
 // Needed defines by Canfestival lib
 #define MAX_CAN_BUS_ID 1
@@ -70,7 +70,7 @@ repeat repeat repeat repeat
 #define CO_ENABLE_CHANGE_NODE_ID
 
 #define EV
-#define EV_SENSOR
+// #define EV_SENSOR
 // #define EV_LED
 
 #endif /* _CONFIG_H_ */

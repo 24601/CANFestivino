@@ -11,10 +11,11 @@ UNS8 canSend(Message *m)
 {
     if (CAN.sendMsgBuf((uint32_t)m->cob_id, 0, m->rtr, m->len, m->data) == CAN_FAILTX)
     {
+        Serial.println(F("Can Send Failed"));
         if (CAN.checkError())
             setTxErrorState(tx_error);
-        // else
-        //     setTxErrorState (tx_all_busy);
+        else
+            setTxErrorState (tx_all_busy);
     }
     else
     {
@@ -26,7 +27,7 @@ UNS8 canSend(Message *m)
 
 void initCAN()
 {
-    while (CAN_OK != CAN.begin(CAN_250KBPS, MCP_8MHz)) // init can bus : baudrate = 10k
+    while (CAN_OK != CAN.begin(CAN_250KBPS, MCP_8MHz)) // BG changed from MCP_8MHz  // init can bus : baudrate = 10k
     {
         Serial.println(F("CAN BUS Module Failed to Initialized"));
         Serial.println(F("Retrying...."));

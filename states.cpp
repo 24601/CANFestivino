@@ -59,8 +59,12 @@ e_nodeState getState() {
  ** @param m
  **/
 void canDispatch(Message *m) {
+    Serial.println(F("canDispatch"));
     UNS16 cob_id = UNS16_LE(m->cob_id);
-    // Serial.println(cob_id >> 7, HEX);
+    Serial.print(F("cob_id:"));
+    Serial.println(cob_id, HEX);
+    Serial.print(F("cob_id >> 7:"));
+    Serial.println(cob_id >> 7, HEX);
     switch (cob_id >> 7) {
         case SYNC: /* can be a SYNC or a EMCY message */
             if (cob_id == 0x080) /* SYNC */
@@ -87,6 +91,8 @@ void canDispatch(Message *m) {
         case SDOrx:
             if (ObjDict_Data.CurrentCommunicationState.csSDO) {
                 proceedSDO(m);
+            } else {
+                Serial.println(F("!ObjDict_Data.CurrentCommunicationState.csSDO"));
             }
             break;
         case NODE_GUARD:
@@ -103,6 +109,7 @@ void canDispatch(Message *m) {
             if (!ObjDict_Data.CurrentCommunicationState.csLSS)break;
             // if ((* (ObjDict_iam_a_slave)) && cob_id==MLSS_ADRESS)
             // {
+                Serial.println(F("proceedLSS_Slave"));
                 proceedLSS_Slave(m);
             // }
             // else if(!(*(ObjDict_iam_a_slave)) && cob_id==SLSS_ADRESS)
@@ -240,6 +247,8 @@ void setNodeId(UNS8 nodeId) {
 #ifdef CO_ENABLE_LSS
     ObjDict_Data.lss_transfer.nodeID=nodeId;
     if(nodeId==0xFF) {
+        Serial.print(F("setNodeId fn, node :"));
+        Serial.println(nodeId);
         ObjDict_bDeviceNodeId = nodeId;
         return;
     }

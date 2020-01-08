@@ -216,33 +216,35 @@ UNS8 sendLSS(UNS8 command, void *dat1, void *dat2)
 UNS8 proceedLSS_Slave(Message *m)
 {
 
-	#ifdef EV
+#ifdef EV
 	const subindex *si;
     UNS8 si_size;
     ODCallback_t *callbacks;
 
-	UNS32 msgSerialNo = BytesToSerialNum(m->data, 7);
+	// if (m->data[0] == 0x43) {
+		UNS32 msgSerialNo = BytesToSerialNum(m->data, 7);
 
-	if (si = ObjDict_scanIndexOD(0x1018, &si_size, &callbacks)) {
-		UNS32* deviceSerialNo = (UNS32*) si[4].pObject;
-		if (msgSerialNo !=  *deviceSerialNo) {
-			// Serial.println(F("This LSS is not for me"));
-			// Serial.print(F("msgSerialNo:"));
-			// Serial.println(msgSerialNo, HEX);
-			// Serial.print(F("deviceSerialNo:"));
-			// Serial.println(*deviceSerialNo, HEX);
-			return 0;
+		if (si = ObjDict_scanIndexOD(0x1018, &si_size, &callbacks)) {
+			UNS32* deviceSerialNo = (UNS32*) si[4].pObject;
+			Serial.print(F("msgSerialNo:"));
+			Serial.println(msgSerialNo, HEX);
+			Serial.print(F("deviceSerialNo:"));
+			Serial.println(*deviceSerialNo, HEX);
+			if (msgSerialNo !=  *deviceSerialNo) {
+				Serial.println(F("This LSS is not for me"));	
+				return 0;
+			}
+		} else {
+			Serial.println(F("No SN on LSS"));
+			return 0xFF;
 		}
-	} else {
-		// Serial.println(F("No SN on LSS"));
-		return 0xFF;
-	}
+	// }
             
-	#endif
+#endif
 	
 	UNS8 msg_cs;
-	// Serial.print(F("SlaveLSS proceedLSS; command: "));
-	// Serial.println(m->data[0]);
+	Serial.print(F("SlaveLSS proceedLSS; command: "));
+	Serial.println(m->data[0]);
 
 	MSG_WAR(0x3D21, "SlaveLSS proceedLSS; command ", m->data[0]);
 
@@ -252,7 +254,7 @@ UNS8 proceedLSS_Slave(Message *m)
 		/* if there is not a mode change break*/
 		if (m->data[1] == ObjDict_Data.lss_transfer.mode)
 		{
-			// Serial.print(F("SlaveLSS already in the mode"));
+			Serial.println(F("SlaveLSS already in the mode"));
 			MSG_WAR(0x3D22, "SlaveLSS already in the mode ", m->data[1]);
 			break;
 		}
@@ -260,6 +262,7 @@ UNS8 proceedLSS_Slave(Message *m)
 		if (m->data[1] == LSS_CONFIGURATION_MODE)
 		{
 			MSG_WAR(0x3D23, "SlaveLSS switching to configuration mode ", 0);
+			Serial.println(F("SlaveLSS switching to configuration mode "));
 			/* Store the NodeId in case it will be changed */
 			ObjDict_Data.lss_transfer.nodeID= getNodeId();
 			ObjDict_Data.lss_transfer.mode = LSS_CONFIGURATION_MODE;
@@ -267,6 +270,9 @@ UNS8 proceedLSS_Slave(Message *m)
 		else if (m->data[1] == LSS_WAITING_MODE)
 		{
 			MSG_WAR(0x3D24, "SlaveLSS switching to operational mode ", 0);
+			Serial.println(F("SlaveLSS switching to operational mode "));
+			Serial.println(ObjDict_Data.lss_transfer.nodeID);
+			Serial.println(getNodeId());
 
 			/* If the nodeID has changed update it and put the node state to Initialisation. */
 			if (ObjDict_Data.lss_transfer.nodeID != getNodeId())
@@ -274,7 +280,7 @@ UNS8 proceedLSS_Slave(Message *m)
 				if (getNodeId() == 0xFF)
 				{ /* The nodeID was 0xFF; initialize the application*/
 					MSG_WAR(0x3D25, "The node Id has changed. Reseting to Initialisation state", 0);
-					// Serial.print("The node Id has changed. Reseting to Initialisation state");
+					Serial.println(F("The node Id has changed. Reseting to Initialisation state"));
 					setNodeId(ObjDict_Data.lss_transfer.nodeID);
 					setState(Initialisation);
 					Serial.print(F("New NodeId: "));
@@ -297,17 +303,19 @@ UNS8 proceedLSS_Slave(Message *m)
 			if (m->data[1] > 127 && m->data[1] != 0xFF)
 			{
 				MSG_ERR(0x1D26, "NodeID out of range", 0);
+				Serial.println(F("NodeID out of range"));
 				error_code = 1; /* NodeID out of range */
 			}
 			else
 			{
-				// Serial.print(F("SET NodeId"));
-				// Serial.println(m->data[1]);
+				Serial.print(F("SET NodeId: "));
+				Serial.println(m->data[1]);
 				ObjDict_Data.lss_transfer.nodeID = m->data[1];
 			}
 		}
 		else
 		{
+			Serial.println(F("SlaveLSS not in configuration mode"));
 			MSG_WAR(0x3D27, "SlaveLSS not in configuration mode", 0);
 			//error_code=0xFF;
 			break;
@@ -462,6 +470,8 @@ UNS8 proceedLSS_Slave(Message *m)
 			UNS8 si_size;
 			ODCallback_t *callbacks;
 
+			Serial.println(F("Inquire Identity Serial-Number"));
+
 			if (!(si = ObjDict_scanIndexOD(0x1018, &si_size, &callbacks)))
 			{
 				return 0xFF;
@@ -475,9 +485,13 @@ UNS8 proceedLSS_Slave(Message *m)
 		if (ObjDict_Data.lss_transfer.mode == LSS_CONFIGURATION_MODE)
 		{
 			UNS8 NodeID;
-
+		
 			NodeID = getNodeId();
 			MSG_WAR(0x3D38, "SlaveLSS Node ID inquired ", NodeID);
+
+			Serial.print(F("SlaveLSS Node ID inquired "));
+			Serial.println(NodeID);
+
 			sendSlaveLSSMessage(msg_cs, &NodeID, 0);
 		}
 		else

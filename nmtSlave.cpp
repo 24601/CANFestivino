@@ -44,6 +44,10 @@ void proceedNMTstateChange(Message *m) {
     if (ObjDict_Data.nodeState == Pre_operational || ObjDict_Data.nodeState == Operational || ObjDict_Data.nodeState == Stopped) {
 
         MSG_WAR(0x3400, "NMT received. for node :  ", (*m).data[1]);
+        Serial.print(F("NMT received. for node :  "));
+        Serial.println((*m).data[1]);
+        Serial.print(F("NMT received. Data :  "));
+        Serial.println((*m).data[0]);
 
         /* Check if this NMT-message is for this node */
         /* byte 1 = 0 : all the nodes are concerned (broadcast) */

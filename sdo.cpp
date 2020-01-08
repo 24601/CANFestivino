@@ -758,10 +758,10 @@ UNS8 proceedSDO(Message *m) {
         }
         /* Looking for the cobid received. */
         pCobId = (UNS16*) si[1].pObject;
-        // Serial.print(F("SDO My CobId: "));
-        // Serial.println(*pCobId, HEX);
-        // Serial.print(F("Msg CobId: "));
-        // Serial.println(UNS16_LE(m->cob_id), HEX);
+        Serial.print(F("SDO My CobId: "));
+        Serial.println(*pCobId, HEX);
+        Serial.print(F("Msg CobId: "));
+        Serial.println(UNS16_LE(m->cob_id), HEX);
 
         if (*pCobId == UNS16_LE(m->cob_id) || UNS16_LE(m->cob_id) == 0x600) {
             whoami = SDO_SERVER;
@@ -832,8 +832,8 @@ UNS8 proceedSDO(Message *m) {
     if (cs == 0xFF)
         cs = getSDOcs(m->data[0]);
 
-    // Serial.print(F("cs: "));    
-    // Serial.println(cs);    
+    Serial.print(F("cs: "));    
+    Serial.println(cs);    
 
     /* Testing the command specifier */
     /* Allowed : cs = 0, 1, 2, 3, 4, 5, 6 */
@@ -1111,6 +1111,7 @@ UNS8 proceedSDO(Message *m) {
                     failedSDO(CliServNbr, whoami, index, subIndex, errorCode);
                     return 0xFF;
                 }
+                Serial.println(F("SDO Point 1"));
                 /* Preparing the response.*/
                 getSDOlineRestBytes(line, &nbBytes); /* Nb bytes to transfer ? */
                 if (nbBytes > 4) {
@@ -1126,6 +1127,7 @@ UNS8 proceedSDO(Message *m) {
                     data[7] = (UNS8) (nbBytes >> 24);
                     // MSG_WAR(0x3A95, "SDO. Sending normal upload initiate response defined at index 0x1200 + ", nodeId);
                     sendSDO(whoami, CliServNbr, data);
+                    Serial.println(F("SDO Point 2"));
                 } else {
                     /* Expedited upload. (cs = 2 ; e = 1) */
                     data[0] = (UNS8) ((2 << 5) | ((4 - nbBytes) << 2) | 3);
@@ -1143,6 +1145,13 @@ UNS8 proceedSDO(Message *m) {
                     sendSDO(whoami, CliServNbr, data);
                     /* Release the line.*/
                     resetSDOline(line);
+                    Serial.println(F("SDO Point 3"));
+                    Serial.println(CliServNbr);
+                    for (i = 0; i < 8; i++) {
+                        Serial.print(data[i], HEX);
+                        Serial.print(" ");
+                    }
+                    Serial.println();
                 }
             } /* end if I am SERVER*/
 #ifdef CO_ENABLE_SDO_CLIENT
