@@ -109,14 +109,15 @@ template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::CO_Cyc
         canDispatch(&m);         // process it
     }
 
-    if (CAN.checkError()) {
-        if (error == 0) {
-            error = 1;
-            byte e = CAN.getError();
-            Serial.print(F("I'm in an error state: "));
-            Serial.println(e);
-        }
-    }
+    // if (CAN.checkError()) {
+    //     if (error == 0) {
+    //         error = 1;
+    //         byte e = CAN.getError();
+    //         Serial.print(F("I'm in an error state: "));
+    //         Serial.println(e);
+    //         setState(e_nodeState::Stopped);
+    //     }
+    // }
 
     uint8_t ef = CAN.getError();
     if (ef & MCP_EFLG_TXWAR)

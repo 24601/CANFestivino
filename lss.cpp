@@ -285,6 +285,7 @@ UNS8 proceedLSS_Slave(Message *m)
 					setState(Initialisation);
 					Serial.print(F("New NodeId: "));
 					Serial.println(ObjDict_bDeviceNodeId);
+					CAN.init_Filt(0,0, getNodeId()); // RxPDO and SDO
 				}
 				else
 				{ /* The nodeID will be changed on NMT_Reset_Comunication Request*/

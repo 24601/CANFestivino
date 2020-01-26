@@ -59,12 +59,12 @@ e_nodeState getState() {
  ** @param m
  **/
 void canDispatch(Message *m) {
-    Serial.println(F("canDispatch"));
+    // Serial.println(F("canDispatch"));
     UNS16 cob_id = UNS16_LE(m->cob_id);
-    Serial.print(F("cob_id:"));
-    Serial.println(cob_id, HEX);
-    Serial.print(F("cob_id >> 7:"));
-    Serial.println(cob_id >> 7, HEX);
+    // Serial.print(F("cob_id:"));
+    // Serial.println(cob_id, HEX);
+    // Serial.print(F("cob_id >> 7:"));
+    // Serial.println(cob_id >> 7, HEX);
     switch (cob_id >> 7) {
         case SYNC: /* can be a SYNC or a EMCY message */
             if (cob_id == 0x080) /* SYNC */

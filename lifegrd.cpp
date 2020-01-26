@@ -169,8 +169,8 @@ void ProducerHeartbeatAlarm(UNS8 id) {
          ** (decimal) and additionaly
          ** the node-id of this device.
          */
-        Serial.print(F("ProducerHeartbeatAlarm Id: "));
-        Serial.println(ObjDict_bDeviceNodeId);
+        // Serial.print(F("ProducerHeartbeatAlarm Id: "));
+        // Serial.println(ObjDict_bDeviceNodeId);
         UNS16 tmp = (UNS16) ObjDict_bDeviceNodeId + 0x700;
 //       UNS16 tmp = 0x724;
         msg.cob_id = UNS16_LE(tmp);

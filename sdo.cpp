@@ -651,6 +651,8 @@ UNS8 sendSDO(UNS8 whoami, UNS8 CliServNbr, UNS8 *pData) {
     MSG_WAR(0x3A38, "sendSDO", 0);
     if (!((ObjDict_Data.nodeState == Operational) || (ObjDict_Data.nodeState == Pre_operational))) {
         MSG_WAR(0x2A39, "unable to send the SDO (not in op or pre-op mode", ObjDict_Data.nodeState);
+        // Serial.print(F("unable to send the SDO (not in op or pre-op mode"));
+        // Serial.println(ObjDict_Data.nodeState);
         return 0xFF;
     }
 
@@ -659,6 +661,7 @@ UNS8 sendSDO(UNS8 whoami, UNS8 CliServNbr, UNS8 *pData) {
     if (whoami == SDO_SERVER) {
         if (!(si = ObjDict_scanIndexOD(0x1200 + CliServNbr, &si_size, &callbacks))) {
             MSG_ERR(0x1A42, "SendSDO : SDO server not found", 0);
+            // Serial.println(F("SendSDO : SDO server not found"));
             return 0xFF;
         }
         m.cob_id = (UNS16) *((UNS32*) si[2].pObject);
@@ -797,6 +800,13 @@ UNS8 proceedSDO(Message *m) {
         } /* end while */
     }
     if (whoami == SDO_UNKNOWN) {
+        return 0xFF;/* This SDO was not for us ! */
+    }
+
+    if (whoami == SDO_SERVER && UNS16_LE(m->cob_id) == 0x600 && getNodeId() != 255) {
+        Serial.print(F("Ignoring SDO as have NodeId: "));
+        Serial.println(getNodeId());
+        // This message was to get SerialNumbers for devices without a NodeID, but asa we have one we will ignore this message
         return 0xFF;/* This SDO was not for us ! */
     }
 
@@ -1111,7 +1121,7 @@ UNS8 proceedSDO(Message *m) {
                     failedSDO(CliServNbr, whoami, index, subIndex, errorCode);
                     return 0xFF;
                 }
-                Serial.println(F("SDO Point 1"));
+                // Serial.println(F("SDO Point 1"));
                 /* Preparing the response.*/
                 getSDOlineRestBytes(line, &nbBytes); /* Nb bytes to transfer ? */
                 if (nbBytes > 4) {
@@ -1127,7 +1137,7 @@ UNS8 proceedSDO(Message *m) {
                     data[7] = (UNS8) (nbBytes >> 24);
                     // MSG_WAR(0x3A95, "SDO. Sending normal upload initiate response defined at index 0x1200 + ", nodeId);
                     sendSDO(whoami, CliServNbr, data);
-                    Serial.println(F("SDO Point 2"));
+                    // Serial.println(F("SDO Point 2"));
                 } else {
                     /* Expedited upload. (cs = 2 ; e = 1) */
                     data[0] = (UNS8) ((2 << 5) | ((4 - nbBytes) << 2) | 3);
@@ -1145,13 +1155,13 @@ UNS8 proceedSDO(Message *m) {
                     sendSDO(whoami, CliServNbr, data);
                     /* Release the line.*/
                     resetSDOline(line);
-                    Serial.println(F("SDO Point 3"));
-                    Serial.println(CliServNbr);
-                    for (i = 0; i < 8; i++) {
-                        Serial.print(data[i], HEX);
-                        Serial.print(" ");
-                    }
-                    Serial.println();
+                    // Serial.println(F("SDO Point 3"));
+                    // Serial.println(CliServNbr);
+                    // for (i = 0; i < 8; i++) {
+                    //     Serial.print(data[i], HEX);
+                    //     Serial.print(" ");
+                    // }
+                    // Serial.println();
                 }
             } /* end if I am SERVER*/
 #ifdef CO_ENABLE_SDO_CLIENT

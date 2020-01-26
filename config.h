@@ -43,7 +43,7 @@
 #ifndef F_CPU
 #define F_CPU          (1000UL*FOSC) // Need for AVR GCC
 #endif
-#define CAN_BAUDRATE    250 //BG - 250 // Check this as may be relative to 8MHz //Need to change on CAN Object as well
+// #define CAN_BAUDRATE    250 //BG - 250 // Check this as may be relative to 8MHz //Need to change on CAN Object as well
 
 // Needed defines by Canfestival lib
 #define MAX_CAN_BUS_ID 1
@@ -69,8 +69,10 @@ repeat repeat repeat repeat
 #define CO_ENABLE_LSS
 #define CO_ENABLE_CHANGE_NODE_ID
 
+// #define WRITE_EEPROM
 #define EV
-// #define EV_SENSOR
-// #define EV_LED
+// #define EV_8MHZ
+#define EV_SENSOR
+#define EV_LED
 
 #endif /* _CONFIG_H_ */
